@@ -23,8 +23,12 @@ const db = new sqlite3.Database('./db/election.db', err => {
 
 // Get all candidates
 app.get('/api/candidates', (req, res) => {
-    const sql = `SELECT * FROM candidates`;
-    const params = [];
+  const sql = `SELECT candidates.*, parties.name 
+    AS party_name 
+    FROM candidates 
+    LEFT JOIN parties 
+    ON candidates.party_id = parties.id`;
+  const params = [];
     db.all(sql, params, (err, rows) => {
       if (err) {
         res.status(500).json({ error: err.message });
@@ -40,9 +44,13 @@ app.get('/api/candidates', (req, res) => {
 
 // Get single candidate
 app.get('/api/candidate/:id', (req, res) => {
-    const sql = `SELECT * FROM candidates 
-                 WHERE id = ?`;
-    const params = [req.params.id];
+  const sql = `SELECT candidates.*, parties.name 
+    AS party_name 
+    FROM candidates 
+    LEFT JOIN parties 
+    ON candidates.party_id = parties.id 
+    WHERE candidates.id = ?`;
+  const params = [req.params.id];
     db.get(sql, params, (err, row) => {
       if (err) {
         res.status(400).json({ error: err.message });
@@ -53,7 +61,7 @@ app.get('/api/candidate/:id', (req, res) => {
         message: 'success',
         data: row
       });
-    });
+  });
 });
 
 // Delete a candidate
